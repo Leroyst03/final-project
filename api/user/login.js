@@ -22,14 +22,14 @@ module.exports = async function handler(req, res) {
 
         const user = await db.collection("users").findOne({ email });
         if (!user) {
-        await client.close();
-        return res.status(401).json({ error: "Credenciales inválidas" });
+            await client.close();
+            return res.status(401).json({ error: "Credenciales inválidas" });
         }
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
-        await client.close();
-        return res.status(401).json({ error: "Credenciales inválidas" });
+            await client.close();
+            return res.status(401).json({ error: "Credenciales inválidas" });
         }
 
         const token = jwt.sign({ id: user._id }, secret, { expiresIn: "1h" });

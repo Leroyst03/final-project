@@ -25,43 +25,43 @@ module.exports = async function handler(req, res) {
         const db = client.db(dbName);
 
         if (req.method === "GET") {
-        // Buscar solo al usuario logueado
-        const user = await db
-            .collection("users")
-            .findOne(
-            { _id: new ObjectId(payload.id) },
-            { projection: { password: 0 } } // ocultamos password
-            );
+            // Buscar solo al usuario logueado
+            const user = await db
+                .collection("users")
+                .findOne(
+                { _id: new ObjectId(payload.id) },
+                { projection: { password: 0 } } // ocultamos password
+                );
 
-        await client.close();
+            await client.close();
 
-        if (!user) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
-        }
+            if (!user) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
 
-        return res.status(200).json({ user });
+            return res.status(200).json({ user });
         }
 
         if (req.method === "PUT") {
-        const { name, age, password } = req.body;
-        const updateData = {};
-        if (name) updateData.name = name;
-        if (age) updateData.age = age;
-        if (password) updateData.password = await bcrypt.hash(password, 10);
+            const { name, age, password } = req.body;
+            const updateData = {};
+            if (name) updateData.name = name;
+            if (age) updateData.age = age;
+            if (password) updateData.password = await bcrypt.hash(password, 10);
 
-        const result = await db
-            .collection("users")
-            .updateOne({ _id: new ObjectId(payload.id) }, { $set: updateData });
+            const result = await db
+                .collection("users")
+                .updateOne({ _id: new ObjectId(payload.id) }, { $set: updateData });
 
-        await client.close();
+            await client.close();
 
-        if (result.matchedCount === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
-        }
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
 
-        return res
-            .status(200)
-            .json({ message: "Perfil actualizado correctamente" });
+            return res
+                .status(200)
+                .json({ message: "Perfil actualizado correctamente" });
         }
 
         await client.close();
