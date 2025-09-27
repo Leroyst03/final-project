@@ -1,5 +1,6 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const uri = process.env.MONGO_URI;
 const secret = process.env.JWT_SECRET;
@@ -24,13 +25,21 @@ module.exports = async function handler(req, res) {
     const db = client.db(dbName);
 
     if (req.method === "GET") {
-      const usuarios = await db
+      // Buscar solo al usuario logueado
+      const user = await db
         .collection("users")
-        .find()
-        .project({ password: 0 }) // ocultamos password
-        .toArray();
+        .findOne(
+          { _id: new ObjectId(payload.id) },
+          { projection: { password: 0 } } // ocultamos password
+        );
+
       await client.close();
-      return res.status(200).json({ usuarios });
+
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+
+      return res.status(200).json({ user });
     }
 
     if (req.method === "PUT") {
@@ -42,9 +51,10 @@ module.exports = async function handler(req, res) {
 
       const result = await db
         .collection("users")
-        .updateOne({ _id: payload.id }, { $set: updateData });
+        .updateOne({ _id: new ObjectId(payload.id) }, { $set: updateData });
 
       await client.close();
+
       if (result.matchedCount === 0) {
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
