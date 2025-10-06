@@ -3,7 +3,6 @@ const express = require("express");
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
-// Handlers de tu API
 const registerHandler = require("../api/user/register.js");
 const loginHandler = require("../api/user/login.js");
 const profileHandler = require("../api/user/profile.js");
@@ -75,3 +74,4 @@ describe("Integración completa con MongoDB real", () => {
     expect([200, 404, 401]).toContain(res.status);
   });
 });
+
